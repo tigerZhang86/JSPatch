@@ -17,6 +17,7 @@
 #import "JPJSClassTest.h"
 #import "JPMemory.h"
 #import "JPPerformanceTest.h"
+#import "JPCFunctionTest.h"
 
 @interface JSPatchTests : XCTestCase
 
@@ -51,6 +52,10 @@
     XCTAssert(obj.funcReturnVoidPassed, @"funcReturnVoidPassed");
     
     XCTAssert(obj.funcReturnStringPassed, @"funcReturnStringPassed");
+    
+    // Test for functions which return double/float, cause there's a fatal bug in NSInvocation on iOS7.0
+    // This case shall fail if you comment line 957~959 in JPEngine.m on iOS7.0.
+    XCTAssert(obj.funcReturnDoublePassed, @"funcReturnDoublePassed");
     
     XCTAssert(obj.funcWithIntPassed, @"funcWithIntPassed");
     XCTAssert(obj.funcWithNilPassed, @"funcWithNilPassed");
@@ -138,6 +143,9 @@
     XCTAssert(obj.classFuncToSwizzleReturnObjPassed, @"classFuncToSwizzleReturnObjPassed");
     XCTAssert(obj.classFuncToSwizzleReturnObjCalledOriginalPassed, @"classFuncToSwizzleReturnObjCalledOriginalPassed");
     XCTAssert(obj.classFuncToSwizzleReturnIntPassed, @"classFuncToSwizzleReturnIntPassed");
+    // Test for functions which return double/float, cause there's a fatal bug in NSInvocation on iOS7.0
+    // This case shall fail if you comment line 1050~1052 in JPEngine.m on iOS7.0.
+    XCTAssert(obj.classFuncToSwizzleReturnDoublePassed, @"classFuncToSwizzleReturnDoublePassed");
     
     XCTAssert(subObj.funcCallSuperSubObjectPassed, @"funcCallSuperSubObjectPassed");
     XCTAssert(subObj.funcCallSuperPassed, @"funcCallSuperPassed");
@@ -260,6 +268,15 @@
 }
 
 
+- (void)testCFunction
+{
+    [self loadPatch:@"jsCFunctionTest"];
+    XCTAssert([JPCFunctionTest testCfuncWithId], @"testCfuncWithId");
+    XCTAssert([JPCFunctionTest testCfuncWithInt], @"testCfuncWithInt");
+    XCTAssert([JPCFunctionTest testCfuncWithCGFloat], @"testCfuncWithCGFloat");
+    XCTAssert([JPCFunctionTest testCfuncReturnPointer], @"testCfuncReturnPointer");
+    XCTAssert([JPCFunctionTest testCFunctionReturnClass], @"testCFunctionReturnClass");
+}
 
 #pragma mark - multithreadTest
 
@@ -413,6 +430,24 @@ void thread(void* context)
     JPPerformanceTest *obj = [[JPPerformanceTest alloc] init];
     [self measureBlock:^{
         [obj testJSCallJSMethodWithLargeDictionaryParamAutoConvert];
+    }];
+}
+
+- (void)testJSCallMallocJPMemory
+{
+    [self loadPatch:@"performanceTest"];
+    JPPerformanceTest *obj = [[JPPerformanceTest alloc] init];
+    [self measureBlock:^{
+        [obj testJSCallMallocJPMemory];
+    }];
+}
+
+- (void)testJSCallMallocJPCFunction
+{
+    [self loadPatch:@"performanceTest"];
+    JPPerformanceTest *obj = [[JPPerformanceTest alloc] init];
+    [self measureBlock:^{
+        [obj testJSCallMallocJPCFunction];
     }];
 }
 
