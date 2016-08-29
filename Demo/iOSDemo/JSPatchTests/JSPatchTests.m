@@ -18,6 +18,7 @@
 #import "JPMemory.h"
 #import "JPPerformanceTest.h"
 #import "JPCFunctionTest.h"
+#import "JPNumberTest.h"
 
 @interface JSPatchTests : XCTestCase
 
@@ -276,6 +277,17 @@
     XCTAssert([JPCFunctionTest testCfuncWithCGFloat], @"testCfuncWithCGFloat");
     XCTAssert([JPCFunctionTest testCfuncReturnPointer], @"testCfuncReturnPointer");
     XCTAssert([JPCFunctionTest testCFunctionReturnClass], @"testCFunctionReturnClass");
+    XCTAssert([JPCFunctionTest testCFunctionVoid], @"testCFunctionVoid");
+}
+
+#pragma mark - jsNumberTest
+
+- (void)testJPNumber {
+    [self loadPatch:@"jsNumberTest"];
+    XCTAssert([JPNumberTest testJPNumNSNumber], @"testJPNumNSNumber");
+    XCTAssert([JPNumberTest testJPNumNSDecimalNumber], @"testJPNumNSDecimalNumber");
+    XCTAssert([JPNumberTest testJPNumToJS], @"testJPNumToJS");
+    XCTAssert([JPNumberTest testJPNUmToOC], @"testJPNumToOC");
 }
 
 #pragma mark - multithreadTest
